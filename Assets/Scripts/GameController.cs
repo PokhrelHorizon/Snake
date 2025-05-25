@@ -10,9 +10,10 @@ public class GameController : MonoBehaviour
 
     //reference input c class and actions inside it
     private PlayerMovement playerMovement;
-    private InputAction horizontalInput, verticalInput;
 
     public UnityEvent StartOfGame;
+    public UnityEvent OnCollectibleConsumed;
+    public UnityEvent OnGameOver;
 
     //stores head properties
     private Vector3 headMoveDirection = Vector3.right;
@@ -22,12 +23,13 @@ public class GameController : MonoBehaviour
     private Vector3 activeMoveDirection =  Vector3.right;
 
     //play area extent from each side to do wraparound
-    [SerializeField] int playAreaExtent;
+    [field:SerializeField] public int PlayAreaExtent { get; private set; }
 
     [SerializeField] private float playerSpeed;
 
 
-    private void Awake(){
+    private void Awake()
+    {
         //configure input reading
         playerMovement = new PlayerMovement();
         playerMovement.Movement.Enable();
@@ -37,20 +39,24 @@ public class GameController : MonoBehaviour
     }
 
 
-    private void Start(){
+    private void Start()
+    {
         StartOfGame.Invoke();
     }
 
 
     //read inputs on update
-    private void Update(){
+    private void Update()
+    {
         //disables movement register in H/V direction if player moving in same direction
-        if (playerMovement.Movement.Horizontalmovement.WasPerformedThisFrame() && activeMoveDirection.x ==0){
+        if (playerMovement.Movement.Horizontalmovement.WasPerformedThisFrame() && activeMoveDirection.x ==0)
+        {
             float moveXValue = playerMovement.Movement.Horizontalmovement.ReadValue<float>();
             headMoveDirection = new Vector3(moveXValue, 0);
             snakeHeadRotation = (moveXValue == 1) ? Vector3.zero : new Vector3(0, 0, 180);
         }
-        else if (playerMovement.Movement.Verticalmovement.WasPerformedThisFrame() & activeMoveDirection.y ==0){
+        else if (playerMovement.Movement.Verticalmovement.WasPerformedThisFrame() & activeMoveDirection.y ==0)
+        {
             float moveYValue = playerMovement.Movement.Verticalmovement.ReadValue<float>();
             headMoveDirection = new Vector3(0, moveYValue);
             snakeHeadRotation = (moveYValue == 1) ? new Vector3(0, 0, 90) : new Vector3(0, 0, -90);
@@ -59,7 +65,8 @@ public class GameController : MonoBehaviour
 
 
     //move snake on fixed update
-    private void FixedUpdate(){
+    private void FixedUpdate()
+    {
         activeMoveDirection = headMoveDirection;
         //rotate head
         snakeBody[0].transform.eulerAngles = snakeHeadRotation;
@@ -68,7 +75,8 @@ public class GameController : MonoBehaviour
 
         
         //when moving,save initial position of head, move head to destination, use initial position as destination of next part and so on
-        for (int i = 0; i < snakeBody.Count; i++){
+        for (int i = 0; i < snakeBody.Count; i++)
+        {
             destinationPosition = (i == 0) ? snakeBody[i].transform.position + activeMoveDirection : initialPosition;
             initialPosition = snakeBody[i].transform.position;
 
@@ -77,18 +85,22 @@ public class GameController : MonoBehaviour
         
         //check if snake head moves out of bounds if so do a wraparound
         //Horizontal
-        if(snakeBody[0].transform.position.x > playAreaExtent){
-            snakeBody[0].transform.position = new Vector2(-playAreaExtent , snakeBody[0].transform.position.y);
+        if(snakeBody[0].transform.position.x > PlayAreaExtent)
+        {
+            snakeBody[0].transform.position = new Vector2(-PlayAreaExtent , snakeBody[0].transform.position.y);
         }
-        else if(snakeBody[0].transform.position.x < -playAreaExtent){
-            snakeBody[0].transform.position = new Vector2(playAreaExtent, snakeBody[0].transform.position.y);
+        else if(snakeBody[0].transform.position.x < -PlayAreaExtent)
+        {
+            snakeBody[0].transform.position = new Vector2(PlayAreaExtent, snakeBody[0].transform.position.y);
         }
         //Vertical
-        if (snakeBody[0].transform.position.y > playAreaExtent){
-            snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, -playAreaExtent);
+        if (snakeBody[0].transform.position.y > PlayAreaExtent)
+        {
+            snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, -PlayAreaExtent);
         }
-        else if (snakeBody[0].transform.position.y < -playAreaExtent){
-            snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, playAreaExtent);
+        else if (snakeBody[0].transform.position.y < -PlayAreaExtent)
+        {
+            snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, PlayAreaExtent);
         }
 
     }

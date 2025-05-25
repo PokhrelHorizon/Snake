@@ -22,7 +22,7 @@ public class BodySpawnController : MonoBehaviour
     }
 
 
-    private void SpawnBodyPart()
+    public void SpawnBodyPart()
     {
         int lastIndex = GCS.snakeBody.Count - 1; //determine index position of last object in list
         if(lastIndex <bodyPartsAtStart)

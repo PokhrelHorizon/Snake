@@ -23,6 +23,9 @@ public class HeadCollisionCheck : MonoBehaviour
             //destroy fruit
             Destroy(other.gameObject);
 
+            //play collected audio
+            GameObject.Find("Audio").transform.Find("food").GetComponent<AudioSource>().Play();
+
             //Increase snake size, spawn next collectible and increase score
             GCS.OnCollectibleConsumed.Invoke();
         }

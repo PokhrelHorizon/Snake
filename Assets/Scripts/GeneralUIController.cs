@@ -11,6 +11,9 @@ public class GeneralUIController : MonoBehaviour
     //reference Game over UI and pause UI
     [SerializeField] private GameObject gameOverUI, pauseUI;
 
+    //reference audio
+    [SerializeField] private AudioSource gameOverAudio;
+
     //triggers when pause button pressed
     public void OnGamePause()
     {
@@ -44,6 +47,9 @@ public class GeneralUIController : MonoBehaviour
 
     public void DoGameOver()
     {
+        //play game over sound
+        gameOverAudio.Play();
+
         //freeze game
         Time.timeScale = 0f;
 

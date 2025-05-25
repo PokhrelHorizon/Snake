@@ -9,11 +9,9 @@ public class GameController : MonoBehaviour
     [NonSerialized] public List<GameObject> snakeBody = new List<GameObject>();  //lists to store snake parts they're moving in
 
     //reference input c class and actions inside it
-    private PlayerMovement playerMovement;
+    public PlayerMovement playerMovement;
 
-    public UnityEvent StartOfGame;
-    public UnityEvent OnCollectibleConsumed;
-    public UnityEvent OnGameOver;
+    public UnityEvent StartOfGame, OnCollectibleConsumed,OnGameOver, PauseGame, ResumeGame;
 
     //stores head properties
     private Vector3 headMoveDirection = Vector3.right;
@@ -27,12 +25,15 @@ public class GameController : MonoBehaviour
 
     [SerializeField] private float playerSpeed;
 
+    [NonSerialized] public bool gameIsPaused = false;
+
 
     private void Awake()
     {
         //configure input reading
         playerMovement = new PlayerMovement();
         playerMovement.Movement.Enable();
+        playerMovement.PauseResume.Enable();
 
         //configure game tick rate
         Time.fixedDeltaTime = 1 / playerSpeed;
@@ -60,6 +61,20 @@ public class GameController : MonoBehaviour
             float moveYValue = playerMovement.Movement.Verticalmovement.ReadValue<float>();
             headMoveDirection = new Vector3(0, moveYValue);
             snakeHeadRotation = (moveYValue == 1) ? new Vector3(0, 0, 90) : new Vector3(0, 0, -90);
+        }
+
+        //pauses/resumes game
+        if(playerMovement.PauseResume.PauseButton.WasPerformedThisFrame())
+        {
+            if(!gameIsPaused)
+            {
+                
+                PauseGame.Invoke();
+            }
+            else
+            {               
+                ResumeGame.Invoke();
+            }
         }
     }
 

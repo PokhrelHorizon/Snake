@@ -158,6 +158,34 @@
                     "isPartOfComposite": true
                 }
             ]
+        },
+        {
+            "name": "PauseResume",
+            "id": "35d945d6-2a86-4a6c-99fc-c8ee7eae177f",
+            "actions": [
+                {
+                    "name": "PauseButton",
+                    "type": "Button",
+                    "id": "0ac78bd8-a766-4163-9d03-99ab95cef748",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1150f02f-1386-411a-887d-3b1199782586",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PauseButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

@@ -244,6 +244,34 @@ public partial class @PlayerMovement: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 }
             ]
+        },
+        {
+            ""name"": ""PauseResume"",
+            ""id"": ""35d945d6-2a86-4a6c-99fc-c8ee7eae177f"",
+            ""actions"": [
+                {
+                    ""name"": ""PauseButton"",
+                    ""type"": ""Button"",
+                    ""id"": ""0ac78bd8-a766-4163-9d03-99ab95cef748"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""1150f02f-1386-411a-887d-3b1199782586"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PauseButton"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -252,11 +280,15 @@ public partial class @PlayerMovement: IInputActionCollection2, IDisposable
         m_Movement = asset.FindActionMap("Movement", throwIfNotFound: true);
         m_Movement_Horizontalmovement = m_Movement.FindAction("Horizontal movement", throwIfNotFound: true);
         m_Movement_Verticalmovement = m_Movement.FindAction("Vertical movement", throwIfNotFound: true);
+        // PauseResume
+        m_PauseResume = asset.FindActionMap("PauseResume", throwIfNotFound: true);
+        m_PauseResume_PauseButton = m_PauseResume.FindAction("PauseButton", throwIfNotFound: true);
     }
 
     ~@PlayerMovement()
     {
         UnityEngine.Debug.Assert(!m_Movement.enabled, "This will cause a leak and performance issues, PlayerMovement.Movement.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_PauseResume.enabled, "This will cause a leak and performance issues, PlayerMovement.PauseResume.Disable() has not been called.");
     }
 
     /// <summary>
@@ -435,6 +467,102 @@ public partial class @PlayerMovement: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="MovementActions" /> instance referencing this action map.
     /// </summary>
     public MovementActions @Movement => new MovementActions(this);
+
+    // PauseResume
+    private readonly InputActionMap m_PauseResume;
+    private List<IPauseResumeActions> m_PauseResumeActionsCallbackInterfaces = new List<IPauseResumeActions>();
+    private readonly InputAction m_PauseResume_PauseButton;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "PauseResume".
+    /// </summary>
+    public struct PauseResumeActions
+    {
+        private @PlayerMovement m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public PauseResumeActions(@PlayerMovement wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "PauseResume/PauseButton".
+        /// </summary>
+        public InputAction @PauseButton => m_Wrapper.m_PauseResume_PauseButton;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_PauseResume; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="PauseResumeActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(PauseResumeActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="PauseResumeActions" />
+        public void AddCallbacks(IPauseResumeActions instance)
+        {
+            if (instance == null || m_Wrapper.m_PauseResumeActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_PauseResumeActionsCallbackInterfaces.Add(instance);
+            @PauseButton.started += instance.OnPauseButton;
+            @PauseButton.performed += instance.OnPauseButton;
+            @PauseButton.canceled += instance.OnPauseButton;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="PauseResumeActions" />
+        private void UnregisterCallbacks(IPauseResumeActions instance)
+        {
+            @PauseButton.started -= instance.OnPauseButton;
+            @PauseButton.performed -= instance.OnPauseButton;
+            @PauseButton.canceled -= instance.OnPauseButton;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="PauseResumeActions.UnregisterCallbacks(IPauseResumeActions)" />.
+        /// </summary>
+        /// <seealso cref="PauseResumeActions.UnregisterCallbacks(IPauseResumeActions)" />
+        public void RemoveCallbacks(IPauseResumeActions instance)
+        {
+            if (m_Wrapper.m_PauseResumeActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="PauseResumeActions.AddCallbacks(IPauseResumeActions)" />
+        /// <seealso cref="PauseResumeActions.RemoveCallbacks(IPauseResumeActions)" />
+        /// <seealso cref="PauseResumeActions.UnregisterCallbacks(IPauseResumeActions)" />
+        public void SetCallbacks(IPauseResumeActions instance)
+        {
+            foreach (var item in m_Wrapper.m_PauseResumeActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_PauseResumeActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="PauseResumeActions" /> instance referencing this action map.
+    /// </summary>
+    public PauseResumeActions @PauseResume => new PauseResumeActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Movement" which allows adding and removing callbacks.
     /// </summary>
@@ -456,5 +584,20 @@ public partial class @PlayerMovement: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnVerticalmovement(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "PauseResume" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="PauseResumeActions.AddCallbacks(IPauseResumeActions)" />
+    /// <seealso cref="PauseResumeActions.RemoveCallbacks(IPauseResumeActions)" />
+    public interface IPauseResumeActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "PauseButton" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPauseButton(InputAction.CallbackContext context);
     }
 }

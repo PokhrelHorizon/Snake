@@ -1,5 +1,5 @@
 {
-    "name": "Movement",
+    "name": "PlayerMovement",
     "maps": [
         {
             "name": "Movement",

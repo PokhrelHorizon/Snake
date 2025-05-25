@@ -8,8 +8,7 @@ public class GameController : MonoBehaviour
 {
     [NonSerialized] public List<GameObject> snakeBody = new List<GameObject>();  //lists to store snake parts they're moving in
 
-    //reference input c class and actions inside it
-    public PlayerMovement playerMovement;
+    public PlayerMovement playerMovement; //reference input c class and actions inside it
 
     public UnityEvent StartOfGame, OnCollectibleConsumed,OnGameOver, PauseGame, ResumeGame;
 
@@ -22,11 +21,11 @@ public class GameController : MonoBehaviour
 
     //play area extent from each side to do wraparound
     [field:SerializeField] public int PlayAreaExtent { get; private set; }
-
     [SerializeField] private float playerSpeed;
 
     [NonSerialized] public bool gameIsPaused = false;
 
+    [SerializeField] private GameObject collidableWalls;
 
     private void Awake()
     {
@@ -37,6 +36,17 @@ public class GameController : MonoBehaviour
 
         //configure game tick rate
         Time.fixedDeltaTime = 1 / playerSpeed;
+
+        //check if wrap around is toggled or not
+        if(PlayerPrefs.GetInt("togglewalls") == 0)
+        {
+            collidableWalls.SetActive(false);
+        }
+        else
+        {
+            collidableWalls.SetActive(true);
+
+        }
     }
 
 
@@ -98,25 +108,29 @@ public class GameController : MonoBehaviour
             snakeBody[i].transform.position = destinationPosition;
         }
         
-        //check if snake head moves out of bounds if so do a wraparound
+        //check if snake head moves out of bounds if so do a wraparound, only do this if wrap set to true
         //Horizontal
-        if(snakeBody[0].transform.position.x > PlayAreaExtent)
+        if(PlayerPrefs.GetInt("togglewalls") ==0)
         {
-            snakeBody[0].transform.position = new Vector2(-PlayAreaExtent , snakeBody[0].transform.position.y);
+            if (snakeBody[0].transform.position.x > PlayAreaExtent)
+            {
+                snakeBody[0].transform.position = new Vector2(-PlayAreaExtent, snakeBody[0].transform.position.y);
+            }
+            else if (snakeBody[0].transform.position.x < -PlayAreaExtent)
+            {
+                snakeBody[0].transform.position = new Vector2(PlayAreaExtent, snakeBody[0].transform.position.y);
+            }
+            //Vertical
+            if (snakeBody[0].transform.position.y > PlayAreaExtent)
+            {
+                snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, -PlayAreaExtent);
+            }
+            else if (snakeBody[0].transform.position.y < -PlayAreaExtent)
+            {
+                snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, PlayAreaExtent);
+            }
         }
-        else if(snakeBody[0].transform.position.x < -PlayAreaExtent)
-        {
-            snakeBody[0].transform.position = new Vector2(PlayAreaExtent, snakeBody[0].transform.position.y);
-        }
-        //Vertical
-        if (snakeBody[0].transform.position.y > PlayAreaExtent)
-        {
-            snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, -PlayAreaExtent);
-        }
-        else if (snakeBody[0].transform.position.y < -PlayAreaExtent)
-        {
-            snakeBody[0].transform.position = new Vector2(snakeBody[0].transform.position.x, PlayAreaExtent);
-        }
+        
 
     }
 }
